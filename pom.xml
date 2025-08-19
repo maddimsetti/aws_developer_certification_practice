@@ -41,19 +41,20 @@
 			<version>2.25.25</version>
 		</dependency>
 
+		<!-- Lambda core -->
 		<dependency>
 			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk-s3</artifactId>
-			<version>1.12.700</version>
+			<artifactId>aws-lambda-java-core</artifactId>
+			<version>1.2.3</version>
 		</dependency>
 
-		<!-- AWS Lambda -->
+		<!-- Lambda event models (like S3Event) -->
 		<dependency>
 			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk-lambda</artifactId>
-			<version>1.12.700</version>
+			<artifactId>aws-lambda-java-events</artifactId>
+			<version>3.11.3</version>
 		</dependency>
-    
+		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
@@ -68,12 +69,31 @@
 	</dependencies>
 
 	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
+        <plugins>
+            <!-- Compiler plugin (Java 17) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <release>17</release>
+                </configuration>
+            </plugin>
+
+            <!-- Shade plugin for fat JAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 
 </project>
