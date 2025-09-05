@@ -41,6 +41,12 @@
 			<version>2.25.25</version>
 		</dependency>
 
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>dynamodb</artifactId>
+			<version>2.25.25</version>
+		</dependency>
+
 		<!-- Lambda core -->
 		<dependency>
 			<groupId>com.amazonaws</groupId>
@@ -70,7 +76,7 @@
 
 	<build>
         <plugins>
-            <!-- Compiler plugin (Java 17) -->
+			<!-- Compiler plugin (Java 17) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -79,7 +85,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Shade plugin for fat JAR -->
+			<!-- Shade plugin for fat JAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -94,6 +100,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>
