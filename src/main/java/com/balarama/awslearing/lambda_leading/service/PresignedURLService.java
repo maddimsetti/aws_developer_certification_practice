@@ -41,11 +41,11 @@ public class PresignedURLService {
 	@Value("${aws.region}")
 	private String awsRegion;
 	
-//	@Value("${aws.access.id}")
-//	private String accessID;
-//	
-//	@Value("${aws.secret.token}")
-//	private String secretKey;
+	@Value("${aws.access.id}")
+	private String accessID;
+	
+	@Value("${aws.secret.token}")
+	private String secretKey;
 	
 	@Value("${aws.service}")
 	private String awsService;

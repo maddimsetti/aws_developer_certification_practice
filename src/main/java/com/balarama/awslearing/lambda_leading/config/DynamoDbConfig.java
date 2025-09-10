@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 @Configuration
 public class DynamoDbConfig {
@@ -26,6 +27,13 @@ public class DynamoDbConfig {
         return S3Client.builder()
                 .region(Region.of(awsRegion))
                 .build();
+    }
+	
+	@Bean
+    public S3Presigner s3Presigner() {
+        return S3Presigner.builder()
+                .region(Region.of(awsRegion))
+                .build(); // ✅ Automatically picks up credentials from env/profile
     }
 
 }
