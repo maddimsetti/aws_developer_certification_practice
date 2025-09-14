@@ -5,13 +5,16 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
 import com.amazonaws.services.lambda.runtime.events.models.s3.S3EventNotification.S3EventNotificationRecord;
 import com.balarama.awslearing.lambda_leading.service.FileMetadataService;
+import com.balarama.awslearing.lambda_leading.service.SnsService;
 
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.sns.SnsClient;
 
 public class S3EventHandler implements RequestHandler<S3Event, String> {
 	
 	private final FileMetadataService fileMetadataService;
+	private final SnsService snsService;
 
 	// ✅ No-arg constructor required by AWS Lambda
     public S3EventHandler() {
@@ -19,8 +22,13 @@ public class S3EventHandler implements RequestHandler<S3Event, String> {
         DynamoDbClient dynamoDbClient = DynamoDbClient.builder()
                 .region(Region.EU_WEST_1) // Lambda will set AWS_REGION
                 .build();
+        
+        SnsClient snsClient = SnsClient.builder().region(Region.EU_WEST_1).build();
 
         this.fileMetadataService = new FileMetadataService(dynamoDbClient);
+        this.snsService = new SnsService(snsClient);
+        
+        
     }
 
 
@@ -35,7 +43,10 @@ public class S3EventHandler implements RequestHandler<S3Event, String> {
             long size = record.getS3().getObject().getSizeAsLong();
 
             context.getLogger().log("✅ File uploaded: " + key + " (" + size + " bytes) to bucket: " + bucket);
+            
             fileMetadataService.saveFileMetadata(bucket, key, size);
+            
+            snsService.publish(bucket, key, size);
         }
         return "OK";
     }

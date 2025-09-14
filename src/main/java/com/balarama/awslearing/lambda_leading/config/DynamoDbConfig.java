@@ -8,6 +8,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.sns.SnsClient;
 
 @Configuration
 public class DynamoDbConfig {
@@ -35,5 +36,10 @@ public class DynamoDbConfig {
                 .region(Region.of(awsRegion))
                 .build(); // ✅ Automatically picks up credentials from env/profile
     }
+	
+	@Bean
+	public SnsClient snsClient() {
+		return SnsClient.builder().region(Region.of(awsRegion)).build();
+	}
 
 }
