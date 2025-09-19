@@ -36,7 +36,7 @@ public class SnsService {
 	}
 	
 	public void publish(String bucketname, String fileName, long filesize) {
-		String message = "📂 File uploaded: " + fileName + " (" + filesize + " bytes) in bucket: " + bucketname;
+		String message = "📂 File uploaded in SNS		: " + fileName + " (" + filesize + " bytes) in bucket: " + bucketname;
 		String cachedTopicArn = null;
 		if (topicArn != null) {
             cachedTopicArn = topicArn;
