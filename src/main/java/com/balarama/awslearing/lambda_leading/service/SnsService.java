@@ -1,11 +1,12 @@
 package com.balarama.awslearing.lambda_leading.service;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.services.sns.model.CreateTopicRequest;
 import software.amazon.awssdk.services.sns.model.CreateTopicResponse;
+import software.amazon.awssdk.services.sns.model.ListSubscriptionsByTopicRequest;
+import software.amazon.awssdk.services.sns.model.ListSubscriptionsByTopicResponse;
 import software.amazon.awssdk.services.sns.model.PublishRequest;
 import software.amazon.awssdk.services.sns.model.SubscribeRequest;
 
@@ -32,11 +33,30 @@ public class SnsService {
 	
 	//subscribe email
 	public void subscribeEmail(String email) {
-		snsclient.subscribe(SubscribeRequest.builder().protocol("email").endpoint(email).topicArn(topicArn).build());
+	    // List existing subscriptions for this topic
+	    ListSubscriptionsByTopicResponse subs = snsclient.listSubscriptionsByTopic(
+	        ListSubscriptionsByTopicRequest.builder()
+	            .topicArn(topicArn)
+	            .build()
+	    );
+
+	    boolean alreadySubscribed = subs.subscriptions().stream()
+	        .anyMatch(s -> s.endpoint().equalsIgnoreCase(email) && s.protocol().equals("email"));
+
+	    if (!alreadySubscribed) {
+	        snsclient.subscribe(SubscribeRequest.builder()
+	            .protocol("email")
+	            .endpoint(email)
+	            .topicArn(topicArn)
+	            .build());
+	        System.out.println("✅ Subscription request sent to " + email);
+	    } else {
+	        System.out.println("⚠️ Email already subscribed: " + email);
+	    }
 	}
 	
 	public void publish(String bucketname, String fileName, long filesize) {
-		String message = "📂 File uploaded in SNS		: " + fileName + " (" + filesize + " bytes) in bucket: " + bucketname;
+		String message = "📂 File uploaded in SNS	: " + fileName + " (" + filesize + " bytes) in bucket: " + bucketname;
 		String cachedTopicArn = null;
 		if (topicArn != null) {
             cachedTopicArn = topicArn;
