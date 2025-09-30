@@ -2,15 +2,15 @@ package com.balarama.awslearing.lambda_leading.DTO;
 
 public class APIResponse {
 	private String message;
-	private String data;
+	private Object data;
 	private String status;   // "success" or "error"
    
-	public APIResponse(String message, String data) {
+	public APIResponse(String message, String status) {
 		this.message = message;
-		this.data = data;
+		this.status = status;
 	}
 	
-	public APIResponse(String message, String data, String status) {
+	public APIResponse(String message, Object data, String status) {
 		this.message = message;
 		this.data = data;
 		this.status = status;
@@ -20,7 +20,7 @@ public class APIResponse {
 		return message;
 	}
 
-	public String getData() {
+	public Object getData() {
 		return data;
 	}
 	

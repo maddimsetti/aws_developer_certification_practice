@@ -35,7 +35,7 @@ public class SqsService {
 	/**
      * Initialize queues (create if not present, attach DLQ).
      */
-	public void setupQueues() {
+	public String setupQueues() {
 		// Create/get DLQ
 		dlqURL = sqsClient.createQueue(CreateQueueRequest.builder().queueName(DLQNAME).build()).queueUrl();
 		
@@ -48,6 +48,8 @@ public class SqsService {
         attachDLQ(mainQueueURL, dlqArn);
         System.out.println("✅ Main Queue: " + MAINQUEUENAME + " [" + mainQueueArn + "]");
         System.out.println("✅ DLQ: " + DLQNAME + " [" + dlqArn + "]");
+        
+        return mainQueueArn;
 	}
 	
 	/**
@@ -60,13 +62,13 @@ public class SqsService {
                         .queueUrl(mainQueueURL)
                         .messageBody(messageBody)
                         .build());
-        System.out.println("📨 Sent message: " + messageBody);
+        System.out.println("📨 Sent message successfully to the SQS: " + messageBody);
     }
 	
 	/**
      * Read messages from the main SQS queue.
      */
-	public void receiveMessage() {
+	public List<String> receiveMessagefromSQS() {
 			if(mainQueueURL == null) setupQueues();  // lazy
 			ReceiveMessageResponse response = sqsClient.receiveMessage(ReceiveMessageRequest.builder()
 														.queueUrl(mainQueueURL)
@@ -77,22 +79,66 @@ public class SqsService {
 			List<Message> messages = response.messages();
 			if(messages.isEmpty()) {
 				System.out.println("ℹ️ No messages found.");
-	            return;
+				return List.of(); // return empty list instead of null (cleaner for JSON)
 			}
 			
+			// Extract message bodies
+		    List<String> messageBodies = messages.stream()
+		            .map(Message::body)
+		            .toList();
+			
+		    // Delete messages after extracting bodies
 			for (Message msg : messages) {
 	            System.out.println("📥 Received: " + msg.body());
 	            // After processing, delete it
 	            deleteMessage(mainQueueURL, msg);
+	            System.out.println("Deleted the messages from the SQS");
 	        }
+			
+			return messageBodies;
+	}
+	
+	public List<String> receiveDlqMessages() {
+		if(dlqURL == null) setupQueues();  // lazy
+		try {
+			// Poll the DLQ
+            ReceiveMessageResponse responseDlq = sqsClient.receiveMessage(ReceiveMessageRequest.builder()
+                    .queueUrl(dlqURL)
+                    .maxNumberOfMessages(5) // batch up to 10
+                    .waitTimeSeconds(10)    // long polling
+                    .build());
+            
+            List<Message> sqsMessages = responseDlq.messages();
+            if(sqsMessages.isEmpty()) {
+				System.out.println("ℹ️ No messages found.");
+				return List.of(); // return empty list instead of null (cleaner for JSON)
+			}
+
+            // Extract message bodies
+            List<String> messageBodies = sqsMessages.stream()
+		            .map(Message::body)
+		            .toList();
+			
+		    // Delete messages after extracting bodies
+			for (Message msg : sqsMessages) {
+	            System.out.println("📥 Received: " + msg.body());
+	            // After processing, delete it
+	            deleteMessage(dlqURL, msg);
+	            System.out.println("Deleted the messages from the DLQ");
+	        }
+			return messageBodies;
+		} catch(Exception e) {
+			throw new RuntimeException("Error while reading from DLQ", e);
+		}
+		
 	}
 	
 	/**
      * Delete a message from the queue.
      */
-	private void deleteMessage(String mainQueueUrl, Message msg) {
+	private void deleteMessage(String queueUrl, Message msg) {
 		sqsClient.deleteMessage(DeleteMessageRequest.builder()
-				.queueUrl(mainQueueUrl)
+				.queueUrl(queueUrl)
 				.receiptHandle(msg.receiptHandle())
 				.build());
 		System.out.println("🗑️ Deleted message: " + msg.body());
@@ -133,33 +179,6 @@ public class SqsService {
 													.attributeNames(QueueAttributeName.QUEUE_ARN)
 													.build());
 		return attr.attributes().get(QueueAttributeName.QUEUE_ARN);
-	}
-
-	public List<String> receiveDlqMessages() {
-		List<String> messages = new ArrayList<>();
-		try {
-			// Poll the DLQ
-            ReceiveMessageResponse responseDlq = sqsClient.receiveMessage(ReceiveMessageRequest.builder()
-                    .queueUrl(dlqURL)
-                    .maxNumberOfMessages(5) // batch up to 10
-                    .waitTimeSeconds(10)    // long polling
-                    .build());
-            
-            List<Message> sqsMessages = responseDlq.messages();
-
-            for (Message msg : sqsMessages) {
-                messages.add(msg.body());
-
-                // ✅ Optionally delete after reading (to avoid re-delivery)
-                sqsClient.deleteMessage(DeleteMessageRequest.builder()
-                        .queueUrl(dlqURL)
-                        .receiptHandle(msg.receiptHandle())
-                        .build());
-            }
-		} catch(Exception e) {
-			throw new RuntimeException("Error while reading from DLQ", e);
-		}
-		return messages;
 	}
 
 }
