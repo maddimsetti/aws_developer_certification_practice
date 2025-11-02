@@ -1,4 +1,4 @@
-package com.balarama.awslearing.lambda_leading.service;
+	package com.balarama.awslearing.lambda_leading.service;
 
 import org.springframework.stereotype.Service;
 
@@ -18,7 +18,7 @@ public class DlqMonitoringService {
 		this.snsService = snsService;
 	}
 	
-	public String createAlarmForDlq(String queueName, String dlqArnOrQueueName, String email) {
+	public String createAlarmForDlq(String mainQueueName, String dlqArnOrQueueName, String email) {
 		// 1) Create SNS topic for alerting
 		String topicArn = snsService.createTopic();
 		
@@ -26,7 +26,7 @@ public class DlqMonitoringService {
 		snsService.subscribeEmail(email);
 		
 		// 2) Create CloudWatch alarm
-        String alarmName = "DLQ-" + queueName + "-HasMessages";   //queue name is Main Queue
+        String alarmName = "DLQ-" + mainQueueName + "-HasMessages";   //queue name is Main Queue
         // Metric: ApproximateNumberOfMessagesVisible in name space AWS/SQS
         PutMetricAlarmRequest alarmReq = PutMetricAlarmRequest.builder()
         									.alarmName(alarmName)
@@ -36,13 +36,17 @@ public class DlqMonitoringService {
         									.metricName("ApproximateNumberOfMessagesVisible")
         									.namespace("AWS/SQS")
         									.period(60)
-        									.statistic(Statistic.SAMPLE_COUNT)
+        									.statistic(Statistic.AVERAGE)
         									.alarmActions(topicArn)
-        									.dimensions(Dimension.builder().name("QueueName").value(alarmName).build())
+        									//  👇 Important: Monitor the *DLQ* queue, not the main queue
+        									.dimensions(Dimension.builder()
+        											.name("QueueName")
+        											.value(dlqArnOrQueueName)      // this must be the DLQ name
+        											.build())
         									.build();
         
         cloudWatch.putMetricAlarm(alarmReq);
 		
-        return "Alarm created: " + alarmName + ", SNS topic: " + topicArn;
+        return "Alarm created for DLQ: " + alarmName + ", SNS topic: " + topicArn;
 	}
 }
