@@ -1,0 +1,97 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "CloudWatch Monitoring Stack for File Processor (idempotent SNS + Alarm)"
+
+Parameters:
+  ExistingSnsTopicArn:
+    Type: String
+    Default: ""
+    Description: "(Optional) ARN of existing SNS topic. Leave blank to create a new one."
+
+  ExistingAlarmName:
+    Type: String
+    Default: ""
+    Description: "(Optional) Existing alarm name. Leave blank to create a new one."
+
+Conditions:
+  CreateNewTopic: !Equals [!Ref ExistingSnsTopicArn, ""]
+  CreateNewAlarm: !Equals [!Ref ExistingAlarmName, ""]
+
+Resources:
+  # ───────────── SNS Topic ─────────────
+  FileUploadTopic:
+    Type: AWS::SNS::Topic
+    Condition: CreateNewTopic
+    DeletionPolicy: Retain
+    Properties:
+      Subscription:
+        - Protocol: email
+          Endpoint: maddimsettibalarama@gmail.com
+      DisplayName: "File Upload Notifications"
+
+  # ───────────── CloudWatch Alarm ─────────────
+  InvalidFileCountAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: CreateNewAlarm
+    Properties:
+      AlarmName: !Sub "InvalidFileCountAlarmToS3-${AWS::StackName}"
+      AlarmDescription: "Triggers when InvalidFileCount > 5 within 5 mins"
+      Namespace: "FileValidatorApp"
+      MetricName: "InvalidFileCount"
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 5
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      AlarmActions:
+        - !If [CreateNewTopic, !Ref FileUploadTopic, !Ref ExistingSnsTopicArn]
+      Dimensions:
+        - Name: "App"
+          Value: "Validator"
+
+  # ───────────── CloudWatch Dashboard ─────────────
+  FileProcessorDashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: !Sub "FileProcessorMonitoring-${AWS::StackName}"
+      DashboardBody: !Sub
+        - |
+          {
+            "widgets": [
+              {
+                "type": "metric",
+                "width": 12,
+                "height": 6,
+                "properties": {
+                  "metrics": [
+                    [ "FileValidatorApp", "InvalidFileCount", "App", "Validator" ]
+                  ],
+                  "region": "${AWS::Region}",
+                  "title": "Invalid File Count (Validator)"
+                }
+              },
+              {
+                "type": "alarm",
+                "width": 12,
+                "height": 6,
+                "properties": {
+                  "alarms": [ "${AlarmNameToUse}" ],
+                  "title": "Invalid File Count Alarm"
+                }
+              }
+            ]
+          }
+        - { AlarmNameToUse: !If [CreateNewAlarm, !Ref InvalidFileCountAlarm, !Ref ExistingAlarmName] }
+
+Outputs:
+  FileUploadTopicArn:
+    Description: "SNS topic ARN used for alarms (existing or newly created)"
+    Value: !If [CreateNewTopic, !Ref FileUploadTopic, !Ref ExistingSnsTopicArn]
+
+  FinalAlarmName:
+    Description: "Name of the alarm used (existing or created)"
+    Value: !If [CreateNewAlarm, !Ref InvalidFileCountAlarm, !Ref ExistingAlarmName]
+
+  DashboardName:
+    Description: "Name of the CloudWatch dashboard"
+    Value: !Ref FileProcessorDashboard

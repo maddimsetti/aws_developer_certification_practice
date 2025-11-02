@@ -11,6 +11,7 @@ import com.balarama.awslearing.lambda_leading.service.SqsService;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.sns.SnsClient;
+import software.amazon.awssdk.services.sns.model.PublishResponse;
 import software.amazon.awssdk.services.sqs.SqsClient;
 
 public class S3EventHandler implements RequestHandler<S3Event, String> {
@@ -30,8 +31,7 @@ public class S3EventHandler implements RequestHandler<S3Event, String> {
         SqsClient sqsClient = SqsClient.builder().region(Region.EU_WEST_1).build();
         this.fileMetadataService = new FileMetadataService(dynamoDbClient);
         this.snsService = new SnsService(snsClient);
-        this.sqsService = new SqsService(sqsClient);
-        
+        this.sqsService = new SqsService(sqsClient);        
     }
 
 
@@ -49,9 +49,12 @@ public class S3EventHandler implements RequestHandler<S3Event, String> {
             
             fileMetadataService.saveFileMetadata(bucket, key, size);
             
-            snsService.publish(bucket, key, size);
+            PublishResponse snsResponse = snsService.publish(bucket, key, size);
             
-            sqsService.sendMessage(bucket, key, size);
+            context.getLogger().log("Published message to SNS. MessageId: " + snsResponse.messageId());
+            
+            //sqsService.sendMessage(bucket, key, size);
+            
         }
         return "OK";
     }

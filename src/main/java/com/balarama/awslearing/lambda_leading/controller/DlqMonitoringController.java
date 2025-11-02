@@ -23,7 +23,7 @@ public class DlqMonitoringController {
 
     /**
      * Example:
-     * POST /api/monitor/dlq-create-alarm?&email=test@example.com
+     * POST /api/monitor/dlq-create-alarm?email=test@example.com
      */
     @PostMapping("/dlq-create-alarm")
     public String createDlqAlarm(
