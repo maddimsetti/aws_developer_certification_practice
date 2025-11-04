@@ -1,134 +1,142 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.5.4</version>
-		<relativePath/> <!-- lookup parent from repository -->
-	</parent>
-	<groupId>com.balarama.awslearing</groupId>
-	<artifactId>lambda-leading</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>lambda-leading</name>
-	<description>Learning lambda concepts using aws</description>
-	<url/>
-	<licenses>
-		<license/>
-	</licenses>
-	<developers>
-		<developer/>
-	</developers>
-	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
-	</scm>
-	<properties>
-		<java.version>17</java.version>
-	</properties>
-	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-		<dependency>
-			<groupId>software.amazon.awssdk</groupId>
-			<artifactId>s3</artifactId>
-			<version>2.25.25</version>
-		</dependency>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.4</version>
+		<relativePath /> <!-- lookup parent from repository -->
+    </parent>
 
-		<dependency>
-			<groupId>software.amazon.awssdk</groupId>
-			<artifactId>dynamodb</artifactId>
-			<version>2.25.25</version>
-		</dependency>
+    <groupId>com.balarama.awslearing</groupId>
+    <artifactId>lambda-leading</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>lambda-leading</name>
+    <description>Learning lambda concepts using AWS</description>
 
-		<dependency>
-			<groupId>software.amazon.awssdk</groupId>
-			<artifactId>sns</artifactId>
-			<version>2.25.25</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>software.amazon.awssdk</groupId>
-			<artifactId>sqs</artifactId>
-			<version>2.25.25</version>
-		</dependency>
+    <properties>
+        <java.version>17</java.version>
+    </properties>
 
-		<!-- Lambda core -->
-		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-lambda-java-core</artifactId>
-			<version>1.2.3</version>
-		</dependency>
+    <dependencies>
+        <!-- Spring Web (for local tests or API Gateway integration) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
 
-		<!-- Lambda event models (like S3Event) -->
-		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-lambda-java-events</artifactId>
-			<version>3.11.3</version>
-		</dependency>
+        <!-- AWS SDK v2 -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>2.25.25</version>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>dynamodb</artifactId>
+            <version>2.25.25</version>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>sns</artifactId>
+            <version>2.25.25</version>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>sqs</artifactId>
+            <version>2.25.25</version>
+        </dependency>
 
-		<dependency>
-			<groupId>software.amazon.awssdk</groupId>
-			<artifactId>lambda</artifactId>
-			<version>2.25.64</version>
-		</dependency>
+        <!-- Lambda core & event models -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-core</artifactId>
+            <version>1.2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-events</artifactId>
+            <version>3.11.3</version>
+        </dependency>
 
-		<dependency>
-			<groupId>software.amazon.awssdk</groupId>
-			<artifactId>cloudwatch</artifactId>
-			<version>2.25.60</version> <!-- use latest stable -->
-		</dependency>
+        <!-- Optional AWS utilities -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>lambda</artifactId>
+            <version>2.25.64</version>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>cloudwatch</artifactId>
+            <version>2.25.60</version>
+        </dependency>
 
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-			<version>20231013</version> <!-- latest stable version -->
-		</dependency>
+        <!-- JSON utilities -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20231013</version>
+        </dependency>
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-devtools</artifactId>
-			<scope>runtime</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
+        <!-- DevTools and Test (excluded from Lambda package) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
 	</dependencies>
 
 	<build>
-        <plugins>
-			<!-- Compiler plugin (Java 17) -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <release>17</release>
-                </configuration>
-            </plugin>
+		<plugins>
+			<!-- Java 17 compiler -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<release>17</release>
+				</configuration>
+			</plugin>
 
-			<!-- Shade plugin for fat JAR -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+			<!-- Shade into a single runnable jar; put classes at the jar root
+			(NOT BOOT-INF) -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.5.1</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<createDependencyReducedPom>true</createDependencyReducedPom>
+							<filters>
+								<!-- Exclude signature files that sometimes
+								confuse the classloader -->
+								<filter>
+									<artifact>*:*</artifact>
+									<excludes>
+										<exclude>META-INF/*.SF</exclude>
+										<exclude>META-INF/*.DSA</exclude>
+										<exclude>META-INF/*.RSA</exclude>
+									</excludes>
+								</filter>
+							</filters>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>

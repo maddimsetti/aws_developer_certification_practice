@@ -1,0 +1,44 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk
+      - mvn -v
+      - java -version
+      - jar --version
+
+  pre_build:
+    commands:
+      - mvn clean
+      - echo "-- Current dir --"
+      - pwd
+      - echo "-- Repo tree --"
+      - ls -R
+
+  build:
+    commands:
+      - echo "Packaging"
+      - mvn -q -DskipTests package
+      - "export JAR_PATH=$(ls target/*.jar | grep -v '\\.original$' | head -n 1)"
+      - "echo Using JAR: $JAR_PATH"
+      - "unzip -l \"$JAR_PATH\" | grep -q 'com/balarama/awslearing/lambda_leading/eventhandler/S3EventHandler.class' || (echo \"Handler class not found in jar!\"; exit 2)"
+
+      - rm -rf dist
+      - mkdir -p dist
+      - cp "$JAR_PATH" dist/function.jar
+
+      - cd dist
+      - zip -r function.zip function.jar
+      - cd ..
+
+  post_build:
+    commands:
+      - echo "Build complete"
+      - ls -R dist
+
+artifacts:
+  base-directory: dist        # <— FIXED
+  files:
+    - function.zip               # <— FIXED
