@@ -1,30 +1,33 @@
 version: 0.2
 
-env:
-  variables:
-    # These two are injected from the CodeBuild project's environment variables.
-    # ARTIFACT_BUCKET: my-artifacts-balarama
-    # APP_NAME: lambda-java-sample
 phases:
   install:
     commands:
       - mvn -v
+
   pre_build:
     commands:
-      - mvn -B -DskipTests clean package
+      - mvn clean
+      - echo "-- current Directory --"
+      - pwd
+      - echo "List repo root"
+      - ls -R
+
   build:
     commands:
-      # Adjust path if your module layout differs
-      - JAR_PATH=$(ls target/*-SNAPSHOT.jar || ls target/*.jar)
+      - mvn package
+      - JAR_PATH=$(ls target/*.jar | grep -v original)
+      - ls -l target/
       - mkdir -p dist
       - cp "$JAR_PATH" dist/function.jar
       - cd dist && zip -r function.zip function.jar && cd -
+
   post_build:
     commands:
-      # Keep a versioned copy in S3 for audit/rollback
       - VERSION_TAG=$(date +%Y%m%d-%H%M%S)-$CODEBUILD_BUILD_NUMBER
       - echo "Uploading archive to s3://$ARTIFACT_BUCKET/$APP_NAME/$VERSION_TAG/function.zip"
       - aws s3 cp dist/function.zip "s3://$ARTIFACT_BUCKET/$APP_NAME/$VERSION_TAG/function.zip"
+
 artifacts:
   files:
     - dist/function.zip
