@@ -1,0 +1,28 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - mvn -v
+
+  pre_build:
+    commands:
+      - mvn clean
+      - echo "-- current Directory ---"
+      - pwd
+      - echo "List repo root"
+      - ls -R
+
+  build:
+    commands:
+      - mvn -q clean package
+      - mkdir -p dist
+      - cp target/lambda-leading-0.0.1-SNAPSHOT.jar dist/function.jar
+
+  post_build:
+    commands:
+      - echo "Successfully Build the function.jar"
+
+artifacts:
+  files:
+    - dist/function.jar

@@ -11,14 +11,7 @@
   <artifactId>lambda-leading</artifactId>
   <name>lambda-leading</name>
   <version>0.0.1-SNAPSHOT</version>
-  <description>Learning lambda concepts using aws</description>
-  <developers>
-    <developer />
-  </developers>
-  <licenses>
-    <license />
-  </licenses>
-  <scm />
+  <description>Learning lambda concepts using AWS</description>
   <build>
     <plugins>
       <plugin>

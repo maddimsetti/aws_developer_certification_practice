@@ -37,6 +37,14 @@ public class S3EventHandler implements RequestHandler<S3Event, String> {
 
     @Override
     public String handleRequest(S3Event event, Context context) {
+    	
+    	// ----- Simulated failure for roll back testing ----
+        String fail = System.getenv("FAIL_DEPLOY");
+        if ("true".equalsIgnoreCase(fail)) 
+        {
+            throw new RuntimeException("Simulated failure for rollback test");
+        }
+        
         context.getLogger().log("🚀 Lambda triggered with records: " 
                 + (event.getRecords() != null ? event.getRecords().size() : 0));
 
