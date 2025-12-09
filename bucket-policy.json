@@ -1,0 +1,14 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowUploaderLambdaToReadObjects",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::883640716161:role/service-role/api_gateway_uploader_lambda-role-0i7m9c5h"
+      },
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::lambdas3practice/*"
+    }
+  ]
+}
